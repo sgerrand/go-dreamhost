@@ -1,6 +1,7 @@
 # go-dreamhost
 
 [![Test Status](https://github.com/sgerrand/go-dreamhost/workflows/tests/badge.svg)](https://github.com/sgerrand/go-dreamhost/actions?query=workflow%3Atests)
+[![Test Coverage](https://codecov.io/gh/sgerrand/go-dreamhost/branch/master/graph/badge.svg)](https://codecov.io/gh/sgerrand/go-dreamhost)
 
 `go-dreamhost` is a Go library for accessing the [Dreamhost
 API](https://help.dreamhost.com/hc/en-us/articles/217560167).
