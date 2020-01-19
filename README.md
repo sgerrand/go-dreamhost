@@ -32,4 +32,4 @@ of creating a new client.
 
 ## License
 
-This library is distributed under the [MIT license].
+This library is distributed under the [MIT license](LICENSE).
