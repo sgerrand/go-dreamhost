@@ -7,10 +7,6 @@ import (
 	"testing"
 )
 
-const (
-	defaultURL = "https://api.dreamhost.com/"
-)
-
 func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown func()) {
 	mux = http.NewServeMux()
 
@@ -35,6 +31,7 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 
 func TestNewClient(t *testing.T) {
 	c := NewClient("some-api-key", nil)
+	defaultURL := "https://api.dreamhost.com/"
 
 	if got, want := c.URL.String(), defaultURL; got != want {
 		t.Errorf("NewClient URL is %v, want %v", got, want)
