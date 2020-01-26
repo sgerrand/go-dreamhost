@@ -1,8 +1,16 @@
 package dreamhost
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/google/go-querystring/query"
+	"github.com/google/uuid"
 )
 
 const (
@@ -30,4 +38,77 @@ func NewClient(apiKey string, httpClient *http.Client) *Client {
 	c := &Client{apiKey: apiKey, client: httpClient, URL: url, UserAgent: userAgent}
 
 	return c
+}
+
+type Params struct {
+	apiKey   string `url:"key"`
+	Command  string `url:"cmd"`
+	UniqueId string `url:"unique_id"`
+
+	// Optional parameters
+	Format  string `url:"format,omitempty"`
+	Account string `url:"account,omitempty"`
+}
+
+func addParams(s string, params interface{}) (string, error) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return s, err
+	}
+
+	qs, err := query.Values(params)
+	if err != nil {
+		return s, err
+	}
+
+	u.RawQuery = qs.Encode()
+
+	return u.String(), nil
+}
+
+func newUniqueId() string {
+	return uuid.New().String()
+}
+
+func (c *Client) NewRequest(method, cmd string, body interface{}) (*http.Request, error) {
+	if !strings.HasSuffix(c.URL.Path, "/") {
+		return nil, fmt.Errorf("URL must have a trailing slash, but %q does not", c.URL)
+	}
+
+	if c.apiKey == "" {
+		return nil, fmt.Errorf("An API key must be set to make API requests")
+	}
+
+	params := Params{apiKey: c.apiKey, Command: cmd, Format: "json", UniqueId: newUniqueId()}
+	u, err := addParams(c.URL.String(), params)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error: %v", err))
+		return nil, err
+	}
+
+	var buf io.ReadWriter
+	if body != nil {
+		buf = new(bytes.Buffer)
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		err := enc.Encode(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, u, buf)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error: %v", err))
+		return nil, err
+	}
+
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	if c.UserAgent != "" {
+		req.Header.Set("User-Agent", c.UserAgent)
+	}
+
+	return req, nil
 }
