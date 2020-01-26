@@ -40,10 +40,11 @@ func NewClient(apiKey string, httpClient *http.Client) *Client {
 	return c
 }
 
+// Params specifies the optional parameters to API requests
 type Params struct {
 	apiKey   string `url:"key"`
 	Command  string `url:"cmd"`
-	UniqueId string `url:"unique_id"`
+	UniqueID string `url:"unique_id"`
 
 	// Optional parameters
 	Format  string `url:"format,omitempty"`
@@ -66,10 +67,11 @@ func addParams(s string, params interface{}) (string, error) {
 	return u.String(), nil
 }
 
-func newUniqueId() string {
+func newUniqueID() string {
 	return uuid.New().String()
 }
 
+// NewRequest creates an API request. An API command can be passed in cmd.
 func (c *Client) NewRequest(method, cmd string, body interface{}) (*http.Request, error) {
 	if !strings.HasSuffix(c.URL.Path, "/") {
 		return nil, fmt.Errorf("URL must have a trailing slash, but %q does not", c.URL)
@@ -79,7 +81,7 @@ func (c *Client) NewRequest(method, cmd string, body interface{}) (*http.Request
 		return nil, fmt.Errorf("An API key must be set to make API requests")
 	}
 
-	params := Params{apiKey: c.apiKey, Command: cmd, Format: "json", UniqueId: newUniqueId()}
+	params := Params{apiKey: c.apiKey, Command: cmd, Format: "json", UniqueID: newUniqueID()}
 	u, err := addParams(c.URL.String(), params)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error: %v", err))
